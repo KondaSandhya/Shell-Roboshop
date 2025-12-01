@@ -5,7 +5,8 @@ AMI_ID="ami-09c813fb71547fc4f"
 INSTANCE_TYPE="t3.micro"
 SG="sg-0b3869c561a82bbce"
 instance_names=("frontend" "catalogue" "cart" "checkout" "payment" "shipping" "dispatch" "mongodb" "mysql" "redis" "rabbitmq")
-
+ZONE_ID="Z103444310EGJ8FWSJO0N"
+DOMAIN_NAME="devops84s.shop"
 
 for instance in "${instance_names[@]}" 
 do
@@ -16,10 +17,30 @@ do
     if [ $instance == "frontend" ]
     then
         IP="$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query "Reservations[0].Instances[0].PrivateIpAddress" --output text)"
+        Record_name="$instance.$DOMAIN_NAME"
         echo "$instance Ip address is: $IP"
     else
         IP="$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query "Reservations[0].Instances[0].PublicIpAddress" --output text)"
+        Record_name="$DOMAIN_NAME"
         echo "$instance Ip address is: $IP"
     fi
+
+
+    aws route53 change-resource-record-sets --hosted-zone-id $ZONE_ID  --change-batch '
+    {
+        "Comment": "Creating or Updating the record sets"
+        ,"Changes": [{
+        "Action"              : "UPSERT"
+        ,"ResourceRecordSet"  : {
+            "Name"              : "'" $Record_name "'"
+            ,"Type"             : "A"
+            ,"TTL"              : 1
+            ,"ResourceRecords"  : [{
+                "Value"         : "'" $IP "'"
+            }]
+        }
+        }]
+    }
+    '
 
 done
