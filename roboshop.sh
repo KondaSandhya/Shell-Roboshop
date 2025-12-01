@@ -6,5 +6,5 @@ INSTANCE_TYPE="t3.micro"
 SG="sg-0b3869c561a82bbce"
 
 INSTANCE_ID="$(aws run instances --image-id $AMI_ID --instance-type $INSTANCE_TYPE --security-group-ids $SG
-  --count 1 --query 'Instances[0].InstanceId' --output text)"
+--query 'Instances[0].InstanceId' --output text)"
 echo "Instance created successfully with instance id: $INSTANCE_ID"
