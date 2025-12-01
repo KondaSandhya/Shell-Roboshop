@@ -10,10 +10,10 @@ instance_names=("frontend" "catalogue" "cart" "checkout" "payment" "shipping" "d
 for instance in "${instance_names[@]}" 
 do
 
-    INSTANCE_ID="$(aws ec2 run-instances --image-id $AMI_ID --instance-type $INSTANCE_TYPE --security-group-ids $SG --count 1 --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=$instance}]' --query "Instances[0].InstanceId" --output text)"
-    echo "Instance created successfully with instance id: $INSTANCE_ID"
+    INSTANCE_ID="$(aws ec2 run-instances --image-id $AMI_ID --instance-type $INSTANCE_TYPE --security-group-ids $SG --count 1 --tag-specifications "ResourceType=instance,Tags=[{Key=Name, Value=$instance}]" --query "Instances[0].InstanceId" --output text)"
+    #echo "Instance created successfully with instance id: $INSTANCE_ID"
 
-    if [ $instance =="frontend" ]
+    if [ $instance == "frontend" ]
     then
         IP="$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query "Reservations[0].Instances[0].PrivateIpAddress" --output text)"
         echo "$instance Ip address is: $IP"
