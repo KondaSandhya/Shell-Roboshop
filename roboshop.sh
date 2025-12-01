@@ -10,7 +10,7 @@ instance_names=("frontend" "catalogue" "cart" "checkout" "payment" "shipping" "d
 for instance in "${instance_names[@]}" 
 do
 
-    INSTANCE_ID="$(aws ec2 run-instances --image-id $AMI_ID --instance-type $INSTANCE_TYPE --security-group-ids $SG --count 1 --tag-specifications 'ResouceType=instance,Tags=[{Key=Name,Value=$instance_names}]' --query "Instances[0].InstanceId" --output text)"
+    INSTANCE_ID="$(aws ec2 run-instances --image-id $AMI_ID --instance-type $INSTANCE_TYPE --security-group-ids $SG --count 1 --tag-specifications 'ResouceType=instance,Tags=[{Key=Name,Value=$instance}]' --query "Instances[0].InstanceId" --output text)"
     echo "Instance created successfully with instance id: $INSTANCE_ID"
 
     if [ $instance =="frontend" ]
