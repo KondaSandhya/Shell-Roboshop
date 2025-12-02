@@ -8,7 +8,8 @@ instance_names=("frontend" "catalogue" "cart" "checkout" "payment" "shipping" "d
 ZONE_ID="Z103444310EGJ8FWSJO0N"
 DOMAIN_NAME="devops84s.shop"
 
-for instance in "${instance_names[@]}" 
+#for instance in "${instance_names[@]}" 
+for instance in "$@" 
 do
 
     INSTANCE_ID="$(aws ec2 run-instances --image-id $AMI_ID --instance-type $INSTANCE_TYPE --security-group-ids $SG --count 1 --tag-specifications "ResourceType=instance,Tags=[{Key=Name, Value=$instance}]" --query "Instances[0].InstanceId" --output text)"
