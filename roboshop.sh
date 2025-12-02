@@ -32,11 +32,11 @@ do
         ,"Changes": [{
         "Action"              : "UPSERT"
         ,"ResourceRecordSet"  : {
-            "Name"              : "'" $Record_name "'"
+            "Name"              : "'"$Record_name"'"
             ,"Type"             : "A"
             ,"TTL"              : 1
             ,"ResourceRecords"  : [{
-                "Value"         : "'" $IP "'"
+                "Value"         : "'"$IP"'"
             }]
         }
         }]
