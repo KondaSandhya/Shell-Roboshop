@@ -8,6 +8,7 @@ N="\e[0m"
 LOGS_FOLDER="/var/logs/roboshop-logs"
 SCRIPT_NAME="$(echo $0 | cut -d '.' -f1)"
 LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME"
+SCRIPT_DIR=$(pwd)
 
 mkdir -p $LOGS_FOLDER
 echo "Script started executing at: $(date)" | tee -a $LOG_FILE
@@ -53,7 +54,7 @@ cd /usr/share/nginx/html
 unzip /tmp/frontend.zip &>>$LOG_FILE
 VALIDATE $? "Unzipping Frontend"
 
-cp nginx.conf /etc/nginx/
+cp $SCRIPT_DIR/nginx.conf /etc/nginx/
 VALIDATE $? "Copying Nginx config file"
 
 systemctl restart nginx  &>>$LOG_FILE
