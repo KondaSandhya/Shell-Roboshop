@@ -79,6 +79,6 @@ VALIDATE $? "Copying Mongodb repo file"
 dnf install mongodb-mongosh -y &>>$LOG_FILE
 VALIDATE $? "Mongosh Installation"
 
-mongosh --host mongodb.devops84s.shop </app/db/master-data.js>
+mongosh --host mongodb.devops84s.shop </app/db/master-data.js
 VALIDATE $? "Loading the catalogue data to Mongodb"
 
