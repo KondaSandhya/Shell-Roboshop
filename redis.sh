@@ -27,6 +27,7 @@ VALIDATE() {
         exit 1
     else
         echo -e "$2 is Successfull...." | tee -a $LOG_FILE
+    fi
 }
 
 dnf module disable redis -y &>>$LOG_FILE
