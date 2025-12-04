@@ -1,6 +1,6 @@
 #!/bin/bash
 
-USERID=$(id -u)
+USEERID=$(id -u)
 R="\e[31m"
 G="\e[32m"
 Y="\e[33m"
@@ -21,27 +21,29 @@ else
 fi
 
 VALIDATE() {
-    if [ $1 -ne 0 ]
+    if [ $! -ne 0 ]
     then
         echo -e "$2 is failed...." | tee -a $LOG_FILE
         exit 1
     else
         echo -e "$2 is Successfull...." | tee -a $LOG_FILE
-    fi
 }
 
-cp mongo.repo /etc/yum.repos.d/mongo.repo
-VALIDATE $? "Copying Mongodb Repo file"
+dnf module disable redis -y &>>$LOG_FILE
+VALIDATE $? "Disabling Redis"
 
-dnf install mongodb-org -y &>>$LOG_FILE
-VALIDATE $? "Mongodb Installation"
+dnf module enable redis:7 -y &>>$LOG_FILE
+VALIDATE $? "Enabling Redis"
 
-systemctl enable mongod &>>$LOG_FILE
-systemctl start mongod &>>$LOG_FILE
-VALIDATE $? "Mongodb Started"
+dnf install redis -y &>>$LOG_FILE
+VALIDATE $? "Redis Installation"
 
-sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mongod.conf
+sed -i -e 's/127.0.0.1/0.0.0.0/g' -e '/protected-mode/ c protected-mode no' /etc/redis/redis.conf
 VALIDATE $? "Replacing the default ip address for remote connections"
 
-systemctl restart mongod &>>$LOG_FILE
-VALIDATE $? "Mongodb Restarted"
+systemctl enable redis &>>$LOG_FILE
+VALIDATE $? "Enabling Redis service"
+
+systemctl start redis &>>$LOG_FILE
+VALIDATE $? "Starting Redis service"
+

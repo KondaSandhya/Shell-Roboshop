@@ -20,28 +20,26 @@ else
     echo -e "$G You are running with root user...$N" | tee -a $LOG_FILE
 fi
 
+echo "Enter password for MySQL root user:"
+read -s MYSQL_ROOT_PWD
+
 VALIDATE() {
-    if [ $1 -ne 0 ]
+    if [ $! -ne 0 ]
     then
         echo -e "$2 is failed...." | tee -a $LOG_FILE
         exit 1
     else
         echo -e "$2 is Successfull...." | tee -a $LOG_FILE
-    fi
 }
 
-cp mongo.repo /etc/yum.repos.d/mongo.repo
-VALIDATE $? "Copying Mongodb Repo file"
+dnf install mysql-server -y &>>$LOG_FILE
+VALIDATE $? "Mysql Installation"
 
-dnf install mongodb-org -y &>>$LOG_FILE
-VALIDATE $? "Mongodb Installation"
+systemctl enable mysqld &>>$LOG_FILE
+VALIDATE $? "MYSQL Enabling"
 
-systemctl enable mongod &>>$LOG_FILE
-systemctl start mongod &>>$LOG_FILE
-VALIDATE $? "Mongodb Started"
+systemctl start mysqld &>>$LOG_FILE
+VALIDATE $? "MYSQL Starting"
 
-sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mongod.conf
-VALIDATE $? "Replacing the default ip address for remote connections"
-
-systemctl restart mongod &>>$LOG_FILE
-VALIDATE $? "Mongodb Restarted"
+mysql_secure_installation --set-root-pass $MYSQL_ROOT_PWD &>>$LOG_FILE
+VALIDATE $? "Setting up the MYSQL root password"

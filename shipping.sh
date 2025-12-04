@@ -22,23 +22,16 @@ else
 fi
 
 VALIDATE() {
-    if [ $1 -ne 0 ]
+    if [ $! -ne 0 ]
     then
         echo -e "$2 is failed...." | tee -a $LOG_FILE
         exit 1
     else
         echo -e "$2 is Successfull...." | tee -a $LOG_FILE
-    fi
 }
 
-dnf module disable nodejs -y &>>$LOG_FILE
-VALIDATE $? "Disabling Nodejs"
-
-dnf module enable nodejs:20 -y &>>$LOG_FILE
-VALIDATE $? "Enabling Nodejs"
-
-dnf module install nodejs -y &>>$LOG_FILE
-VALIDATE $? "Nodejs Installation"
+dnf install maven -y &>>$LOG_FILE
+VALIDATE $? "Maven Installation"
 
 id roboshop 
 if [ $? -ne 0 ]
@@ -49,36 +42,41 @@ else
     echo -e "$G roboshop user already exists, Skipping the user creation $N" | tee -a $LOG_FILE
 fi
 
-mkdir -p /app 
+mkdir -p /app
 VALIDATE $? "Creating the App directory"
 
-curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip  &>>$LOG_FILE
-VALIDATE $? "Downloading catalogue Application"
+curl -L -o /tmp/shipping.zip https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip  &>>$LOG_FILE
+VALIDATE $? "Downloading the Shipping Application"
 
 rm -rf /app/* &>>$LOG_FILE
 VALIDATE $? "Removing old catalogue Application files"
+
 cd /app 
 
-unzip /tmp/catalogue.zip &>>$LOG_FILE
-VALIDATE $? "Unzipping catalogue Application"
+unzip /tmp/shipping.zip &>>$LOG_FILE
+VALIDATE $? "Unzipping the Shipping Application"
 
-npm install &>>$LOG_FILE
-VALIDATE $? "Installing Nodejs Dependencies"
+cd /app
+mvn clean package &>>$LOG_FILE
+VALIDATE$? "Building the shipping application"sys
 
-cp $SCRIPT_DIR/catalogue.service /etc/systemd/system/catalogue.service
-VALIDATE $? "Copying catalogue service file"
+mv target/shipping-1.0.jar shipping.jar &>>$LOG_FILE
+VALIDATE $? "Renaming the shipping jar file"
+
+cp $SCRIPT_DIR/shipping.service /etc/systemd/system/shipping.service $>>$LOG_FILE
+VALIDATE $? "Copying shipping service file"
 
 systemctl daemon-reload &>>$LOG_FILE
-systemctl enable catalogue &>>$LOG_FILE
-systemctl start catalogue &>>$LOG_FILE
-VALIDATE $? "Starting catalogue service"
+VALIDATE $? "System Reloading"
 
-cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo
-VALIDATE $? "Copying Mongodb repo file"
+systemctl enable shipping &>>$LOG_FILE
+syatemctl start  shipping &>>$LOG_FILE
+VALIDATE $? "Starting shipping service"
 
-dnf install mongodb-mongosh -y &>>$LOG_FILE
-VALIDATE $? "Mongosh Installation"
+mysql -h mysql.devops84s.shop -uroot -pRoboShop@1 < /app/db/schema.sql
 
-mongosh --host mongodb.devops84s.shop </app/db/master-data.js
-VALIDATE $? "Loading the catalogue data to Mongodb"
+mysql -h mysql.devops84s.shop -uroot -pRoboShop@1 < /app/db/app-user.sql 
 
+mysql -h mysql.devops84s.shop -uroot -pRoboShop@1 < /app/db/master-data.sql
+
+systemctl restart shipping

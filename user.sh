@@ -22,13 +22,12 @@ else
 fi
 
 VALIDATE() {
-    if [ $1 -ne 0 ]
+    if [ $! -ne 0 ]
     then
         echo -e "$2 is failed...." | tee -a $LOG_FILE
         exit 1
     else
         echo -e "$2 is Successfull...." | tee -a $LOG_FILE
-    fi
 }
 
 dnf module disable nodejs -y &>>$LOG_FILE
@@ -37,7 +36,7 @@ VALIDATE $? "Disabling Nodejs"
 dnf module enable nodejs:20 -y &>>$LOG_FILE
 VALIDATE $? "Enabling Nodejs"
 
-dnf module install nodejs -y &>>$LOG_FILE
+dnf module install nodejs -y
 VALIDATE $? "Nodejs Installation"
 
 id roboshop 
@@ -52,33 +51,29 @@ fi
 mkdir -p /app 
 VALIDATE $? "Creating the App directory"
 
-curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip  &>>$LOG_FILE
-VALIDATE $? "Downloading catalogue Application"
+curl -L -o /tmp/user.zip https://roboshop-artifacts.s3.amazonaws.com/user-v3.zip  &>>$LOG_FILE
+VALIDATE $? "Downloading user Application"
 
 rm -rf /app/* &>>$LOG_FILE
 VALIDATE $? "Removing old catalogue Application files"
-cd /app 
 
-unzip /tmp/catalogue.zip &>>$LOG_FILE
-VALIDATE $? "Unzipping catalogue Application"
+cd /app 
+unzip /tmp/user.zip &>>$LOG_FILE
+VALIDATE $? "Unzipping user Application"
 
 npm install &>>$LOG_FILE
 VALIDATE $? "Installing Nodejs Dependencies"
 
-cp $SCRIPT_DIR/catalogue.service /etc/systemd/system/catalogue.service
-VALIDATE $? "Copying catalogue service file"
+cp $SCRIPT_DIR/user.service /etc/systemd/system/user.service
+VALIDATE $? "Copying user service file"
 
 systemctl daemon-reload &>>$LOG_FILE
-systemctl enable catalogue &>>$LOG_FILE
-systemctl start catalogue &>>$LOG_FILE
-VALIDATE $? "Starting catalogue service"
+VALIDATE $? "System Reloading"
 
-cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo
-VALIDATE $? "Copying Mongodb repo file"
+systemctl enable user &>>$LOG_FILE
+VALIDATE $? "Enabling user service"
 
-dnf install mongodb-mongosh -y &>>$LOG_FILE
-VALIDATE $? "Mongosh Installation"
+systemctl start user &>>$LOG_FILE
+VALIDATE $? "Starting user service"
 
-mongosh --host mongodb.devops84s.shop </app/db/master-data.js
-VALIDATE $? "Loading the catalogue data to Mongodb"
 
