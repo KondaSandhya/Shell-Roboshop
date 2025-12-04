@@ -22,7 +22,7 @@ else
 fi
 
 VALIDATE() {
-    if [ $! -ne 0 ]
+    if [ $1 -ne 0 ]
     then
         echo -e "$2 is failed...." | tee -a $LOG_FILE
         exit 1

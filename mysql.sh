@@ -24,7 +24,7 @@ echo "Enter password for MySQL root user:"
 read -s MYSQL_ROOT_PWD
 
 VALIDATE() {
-    if [ $! -ne 0 ]
+    if [ $1 -ne 0 ]
     then
         echo -e "$2 is failed...." | tee -a $LOG_FILE
         exit 1
