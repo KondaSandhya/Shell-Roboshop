@@ -31,14 +31,8 @@ VALIDATE() {
     fi
 }
 
-dnf module disable nodejs -y &>>$LOG_FILE
-VALIDATE $? "Disabling Nodejs"
-
-dnf module enable nodejs:20 -y &>>$LOG_FILE
-VALIDATE $? "Enabling Nodejs"
-
-dnf module install nodejs -y &>>$LOG_FILE
-VALIDATE $? "Nodejs Installation"
+dnf install python3 gcc python3-devel -y &>>$LOG_FILE
+VALIDATE $? "Installing Python3"
 
 id roboshop 
 if [ $? -ne 0 ]
@@ -52,28 +46,27 @@ fi
 mkdir -p /app 
 VALIDATE $? "Creating the App directory"
 
-curl -L -o /tmp/cart.zip https://roboshop-artifacts.s3.amazonaws.com/cart-v3.zip &>>$LOG_FILE
-VALIDATE $? "Downloading cart Application"
+curl -L -o /tmp/payment.zip https://roboshop-artifacts.s3.amazonaws.com/payment-v3.zip &>>$LOG_FILE
+VALIDATE $? "Downloading payment Application"
 
 rm -rf /app/* &>>$LOG_FILE
-VALIDATE $? "Removing old cart Application files"
+VALIDATE $? "Removing old payment Application files"
 
 cd /app 
-unzip /tmp/cart.zip &>>$LOG_FILE
-VALIDATE $? "Unzipping cart Application"
+unzip /tmp/payment.zip &>>$LOG_FILE
+VALIDATE $? "Unzipping payment Application"
 
-npm install &>>$LOG_FILE
-VALIDATE $? "Installing Nodejs Dependencies"
+pip3 install -r requirements.txt &>>$LOG_FILE
+VALIDATE $? "Installing payment Application dependencies"
 
-cp $SCRIPT_DIR/cart.service /etc/systemd/system/cart.service
-VALIDATE $? "Copying cart service file"
+cp $SCRIPT_DIR/payment.service /etc/systemd/system/payment.service
+VALIDATE $? "Copying payment service file"
 
 systemctl daemon-reload &>>$LOG_FILE
 VALIDATE $? "System Reloading"
 
-systemctl enable cart &>>$LOG_FILE
+systemctl enable payment &>>$LOG_FILE
 VALIDATE $? "Enabling the cart service"
 
-systemctl start cart &>>$LOG_FILE
+systemctl start payment &>>$LOG_FILE
 VALIDATE $? "Starting cart service"
-
