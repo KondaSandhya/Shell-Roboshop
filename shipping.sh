@@ -67,7 +67,7 @@ VALIDATE $? "Building the shipping application"sys
 mv target/shipping-1.0.jar shipping.jar &>>$LOG_FILE
 VALIDATE $? "Renaming the shipping jar file"
 
-cp $SCRIPT_DIR/shipping.service /etc/systemd/system/shipping.service $>>$LOG_FILE
+cp $SCRIPT_DIR/shipping.service /etc/systemd/system/ $>>$LOG_FILE
 VALIDATE $? "Copying shipping service file"
 
 systemctl daemon-reload &>>$LOG_FILE
