@@ -74,7 +74,7 @@ systemctl daemon-reload &>>$LOG_FILE
 VALIDATE $? "System Reloading"
 
 systemctl enable shipping &>>$LOG_FILE
-syatemctl start  shipping &>>$LOG_FILE
+systemctl start  shipping &>>$LOG_FILE
 VALIDATE $? "Starting shipping service"
 
 mysql -h mysql.devops84s.shop -uroot -p$MYSQL_ROOT_PWD < /app/db/schema.sql
