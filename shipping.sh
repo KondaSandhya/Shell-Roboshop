@@ -31,6 +31,9 @@ VALIDATE() {
     fi
 }
 
+echo "Enter password for MySQL root user:"
+read -s MYSQL_ROOT_PWD
+
 dnf install maven -y &>>$LOG_FILE
 VALIDATE $? "Maven Installation"
 
@@ -59,7 +62,7 @@ VALIDATE $? "Unzipping the Shipping Application"
 
 cd /app
 mvn clean package &>>$LOG_FILE
-VALIDATE$? "Building the shipping application"sys
+VALIDATE $? "Building the shipping application"sys
 
 mv target/shipping-1.0.jar shipping.jar &>>$LOG_FILE
 VALIDATE $? "Renaming the shipping jar file"
@@ -74,10 +77,11 @@ systemctl enable shipping &>>$LOG_FILE
 syatemctl start  shipping &>>$LOG_FILE
 VALIDATE $? "Starting shipping service"
 
-mysql -h mysql.devops84s.shop -uroot -pRoboShop@1 < /app/db/schema.sql
+mysql -h mysql.devops84s.shop -uroot -p$MYSQL_ROOT_PWD < /app/db/schema.sql
 
-mysql -h mysql.devops84s.shop -uroot -pRoboShop@1 < /app/db/app-user.sql 
+mysql -h mysql.devops84s.shop -uroot -p$MYSQL_ROOT_PWD< /app/db/app-user.sql 
 
-mysql -h mysql.devops84s.shop -uroot -pRoboShop@1 < /app/db/master-data.sql
+mysql -h mysql.devops84s.shop -uroot -p$MYSQL_ROOT_PWD < /app/db/master-data.sql
 
 systemctl restart shipping
+VALIDATE $? "System Restarting shipping service"
