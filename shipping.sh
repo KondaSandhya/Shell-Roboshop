@@ -77,11 +77,19 @@ systemctl enable shipping &>>$LOG_FILE
 systemctl start  shipping &>>$LOG_FILE
 VALIDATE $? "Starting shipping service"
 
-mysql -h mysql.devops84s.shop -uroot -p$MYSQL_ROOT_PWD < /app/db/schema.sql
+dnf install mysql -y  &>>$LOG_FILE
+VALIDATE $? "Install MySQL"
 
-mysql -h mysql.devops84s.shop -uroot -p$MYSQL_ROOT_PWD< /app/db/app-user.sql 
-
-mysql -h mysql.devops84s.shop -uroot -p$MYSQL_ROOT_PWD < /app/db/master-data.sql
+mysql -h mysql.devops84s.shop -u root -p$MYSQL_ROOT_PASSWORD -e 'use cities' &>>$LOG_FILE
+if [ $? -ne 0 ]
+then
+    mysql -h mysql.devops84s.shop -uroot -p$MYSQL_ROOT_PWD < /app/db/schema.sql &>>$LOG_FILE
+    mysql -h mysql.devops84s.shop -uroot -p$MYSQL_ROOT_PWD < /app/db/app-user.sql  &>>$LOG_FILE
+    mysql -h mysql.devops84s.shop -uroot -p$MYSQL_ROOT_PWD < /app/db/master-data.sql &>>$LOG_FILE
+    VALIDATE $? "Loading data into MySQL"
+else
+    echo -e "Data is already loaded into MySQL ... $Y SKIPPING $N"
+fi
 
 systemctl restart shipping
 VALIDATE $? "System Restarting shipping service"
